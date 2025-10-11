@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StarWave AI - Minecraft智能辅助工具</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #6366f1;
+            --primary-dark: #4f46e5;
+            --secondary-color: #8b5cf6;
+            --accent-color: #06b6d4;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            
+            --minecraft-green: #55aa55;
+            --minecraft-dark: #2d2d2d;
+            --minecraft-darker: #1a1a1a;
+            --minecraft-light: #7be77b;
+            
+            --rainbow-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+            --primary-gradient: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            --minecraft-gradient: linear-gradient(135deg, var(--minecraft-green) 0%, var(--minecraft-light) 100%);
+            --glass-gradient: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #15151f;
+            --bg-tertiary: #1f1f2e;
+            --bg-card: rgba(255, 255, 255, 0.06);
+            --bg-card-hover: rgba(255, 255, 255, 0.1);
+            
+            --text-primary: #ffffff;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.15);
+            
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.3);
+            --shadow-minecraft: 0 0 20px rgba(85, 170, 85, 0.5);
+            
+            --transition-fast: 0.15s ease;
+            --transition-normal: 0.3s ease;
+            --transition-slow: 0.5s ease;
+            
+            --border-radius-sm: 8px;
+            --border-radius-md: 12px;
+            --border-radius-lg: 16px;
+            --border-radius-xl: 20px;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+            font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* 改进的背景动效 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 75% 75%, rgba(139, 92, 246, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.08) 0%, transparent 50%);
+            animation: backgroundPulse 20s ease-in-out infinite alternate;
+            z-index: -1;
+        }
+
+        @keyframes backgroundPulse {
+            0% { 
+                transform: translate(0, 0) scale(1);
+                opacity: 0.5;
+            }
+            100% { 
+                transform: translate(-20px, -10px) scale(1.05);
+                opacity: 0.8;
+            }
+        }
+
+        /* 主要内容区域 */
+        .upgrade-container {
+            text-align: center;
+            max-width: 900px;
+            width: 100%;
+            padding: 2rem;
+            position: relative;
+            z-index: 2;
+            margin-top: 20px;
+        }
+
+        /* 升级图标 */
+        .upgrade-icon {
+            width: 220px;
+            height: 220px;
+            margin: 0 auto 3rem;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-circle {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: var(--glass-gradient);
+            backdrop-filter: blur(20px);
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            animation: iconPulse 3s ease-in-out infinite;
+        }
+
+        .icon-circle::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, var(--primary-color), var(--secondary-color), var(--accent-color), transparent);
+            animation: iconRotate 4s linear infinite;
+            opacity: 0.3;
+        }
+
+        .icon-circle::after {
+            content: '';
+            position: absolute;
+            inset: 4px;
+            border-radius: 50%;
+            background: var(--bg-primary);
+            z-index: 1;
+        }
+
+        .upgrade-icon i {
+            font-size: 4.5rem;
+            color: var(--primary-color);
+            z-index: 2;
+            position: relative;
+            animation: iconFloat 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes iconPulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(99, 102, 241, 0.2);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 40px rgba(99, 102, 241, 0.4);
+            }
+        }
+
+        @keyframes iconRotate {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes iconFloat {
+            0% {
+                transform: translateY(0);
+            }
+            100% {
+                transform: translateY(-10px);
+            }
+        }
+
+        /* 标题和内容 */
+        .upgrade-title {
+            font-size: clamp(2.5rem, 6vw, 4.5rem);
+            font-weight: 900;
+            margin-bottom: 1.5rem;
+            background: var(--rainbow-gradient);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.1;
+            letter-spacing: -0.02em;
+            animation: titleGlow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes titleGlow {
+            0% {
+                filter: drop-shadow(0 0 10px rgba(99, 102, 241, 0.3));
+            }
+            100% {
+                filter: drop-shadow(0 0 20px rgba(99, 102, 241, 0.6));
+            }
+        }
+
+        .upgrade-subtitle {
+            font-size: 1.5rem;
+            color: var(--accent-color);
+            margin-bottom: 2rem;
+            font-weight: 500;
+            letter-spacing: -0.01em;
+        }
+
+        .upgrade-description {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            margin-bottom: 3rem;
+            line-height: 1.7;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* 价格卡片 */
+        .price-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-xl);
+            padding: 3rem;
+            max-width: 500px;
+            margin: 3rem auto;
+            position: relative;
+            overflow: hidden;
+            transition: all var(--transition-normal);
+        }
+
+        .price-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: var(--rainbow-gradient);
+        }
+
+        .price-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--border-hover);
+            background: var(--bg-card-hover);
+        }
+
+        .price {
+            font-size: 4rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin: 1.5rem 0;
+            text-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
+        }
+
+        .price-period {
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+        }
+
+        .price-features {
+            list-style: none;
+            margin: 2rem 0;
+            text-align: left;
+        }
+
+        .price-features li {
+            padding: 0.75rem 0;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .price-features li:last-child {
+            border-bottom: none;
+        }
+
+        .price-features li i {
+            color: var(--success-color);
+            margin-right: 0.75rem;
+        }
+
+        /* 新功能卡片 */
+        .feature-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-xl);
+            padding: 2rem;
+            transition: all var(--transition-normal);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 3px;
+            background: var(--rainbow-gradient);
+            transition: left var(--transition-slow);
+        }
+
+        .feature-card:hover::before {
+            left: 0;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--border-hover);
+            background: var(--bg-card-hover);
+        }
+
+        .feature-card-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 1.5rem;
+            background: var(--primary-gradient);
+            border-radius: var(--border-radius-lg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .feature-card h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* 联系信息 */
+        .contact-section {
+            margin: 3rem 0;
+            padding: 2rem;
+            background: var(--bg-secondary);
+            border-radius: var(--border-radius-xl);
+            border: 1px solid var(--border-color);
+        }
+
+        .contact-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            text-align: center;
+        }
+
+        .contact-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .contact-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem 2rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius-md);
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: all var(--transition-normal);
+            font-weight: 500;
+        }
+
+        .contact-link:hover {
+            background: var(--bg-card-hover);
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            color: var(--primary-color);
+        }
+
+        .contact-link i {
+            font-size: 1.2rem;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .upgrade-container {
+                padding: 1.5rem;
+                margin-top: 0;
+            }
+
+            .upgrade-icon {
+                width: 180px;
+                height: 180px;
+                margin-bottom: 2rem;
+            }
+
+            .upgrade-icon i {
+                font-size: 3.5rem;
+            }
+
+            .upgrade-title {
+                margin-bottom: 1rem;
+            }
+
+            .upgrade-subtitle {
+                font-size: 1.2rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .upgrade-description {
+                font-size: 1rem;
+                margin-bottom: 2rem;
+            }
+
+            .feature-cards {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+                margin: 2rem 0;
+            }
+
+            .contact-links {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+            }
+
+            .contact-link {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+
+            .price-card {
+                padding: 2rem;
+            }
+
+            .price {
+                font-size: 3rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .upgrade-container {
+                padding: 1rem;
+            }
+
+            .upgrade-icon {
+                width: 150px;
+                height: 150px;
+            }
+
+            .upgrade-icon i {
+                font-size: 3rem;
+            }
+
+            .feature-card {
+                padding: 1.5rem;
+            }
+
+            .price-card {
+                padding: 1.5rem;
+            }
+        }
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary-gradient);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-color);
+        }
+
+        /* 选择文本样式 */
+        ::selection {
+            background: rgba(99, 102, 241, 0.3);
+            color: var(--text-primary);
+        }
+
+        /* 焦点样式 */
+        *:focus-visible {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        /* 加载动画 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .animate-in {
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        .upgrade-container > * {
+            opacity: 0;
+            animation: fadeInUp 0.8s ease-out forwards;
+        }
+
+        .upgrade-container > *:nth-child(1) { animation-delay: 0.1s; }
+        .upgrade-container > *:nth-child(2) { animation-delay: 0.2s; }
+        .upgrade-container > *:nth-child(3) { animation-delay: 0.3s; }
+        .upgrade-container > *:nth-child(4) { animation-delay: 0.4s; }
+        .upgrade-container > *:nth-child(5) { animation-delay: 0.5s; }
+        .upgrade-container > *:nth-child(6) { animation-delay: 0.6s; }
+        .upgrade-container > *:nth-child(7) { animation-delay: 0.7s; }
+    </style>
+</head>
+<body>
+    <!-- 主要内容 -->
+    <div class="upgrade-container">
+        <!-- 升级图标 -->
+        <div class="upgrade-icon">
+            <div class="icon-circle">
+                <i class="fas fa-crown"></i>
+            </div>
+        </div>
+        
+        <!-- 标题和描述 -->
+        <h1 class="upgrade-title">StarWave AI 高级版</h1>
+        <p class="upgrade-subtitle">🚀 解锁全部功能，体验极致游戏辅助</p>
+        <p class="upgrade-description">
+            StarWave AI 高级版为您提供完整的Minecraft游戏辅助体验，包括智能建造、资源定位、战斗优化等强大功能，让您的游戏体验提升到全新水平。
+        </p>
+        
+        <!-- 价格卡片 -->
+        <div class="price-card animate-in">
+            <h2>高级版授权</h2>
+            <div class="price">¥21<span class="price-period">/永久</span></div>
+            <ul class="price-features">
+                <li><i class="fas fa-check"></i> 全部功能无限制使用</li>
+                <li><i class="fas fa-check"></i> 终身免费更新</li>
+                <li><i class="fas fa-check"></i> 优先技术支持</li>
+                <li><i class="fas fa-check"></i> 多账号授权</li>
+                <li><i class="fas fa-check"></i> 定制功能请求</li>
+            </ul>
+            <div class="contact-link" style="justify-content: center; margin-top: 1.5rem;">
+                <i class="fas fa-shopping-cart"></i>
+                购买请联系客服
+            </div>
+        </div>
+        
+        <!-- 新功能卡片 -->
+        <div class="feature-cards">
+            <div class="feature-card">
+                <div class="feature-card-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h3>智能建造助手</h3>
+                <p>AI驱动的自动建造系统，可识别地形并智能规划建筑布局，一键生成复杂结构。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-card-icon">
+                    <i class="fas fa-search"></i>
+                </div>
+                <h3>资源定位</h3>
+                <p>精准定位稀有矿石、地牢和要塞，节省大量探索时间，快速获取珍贵资源。</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-card-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3>战斗优化</h3>
+                <p>智能战斗辅助，自动瞄准、躲避和策略选择，大幅提升PVP和PVE战斗效率。</p>
+            </div>
+        </div>
+        
+        <!-- 联系信息 -->
+        <div class="contact-section" id="contact">
+            <h3 class="contact-title">需要帮助？联系我们</h3>
+            <div class="contact-links">
+                <a href="#" class="contact-link">
+                    <i class="fab fa-qq"></i>
+                    QQ群: 192999459
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载完成后启动动画
+        document.addEventListener('DOMContentLoaded', () => {
+            // 添加页面加载动画
+            const elements = document.querySelectorAll('.upgrade-container > *');
+            elements.forEach((el, index) => {
+                el.style.animationDelay = (index * 0.1) + 's';
+                el.classList.add('animate-in');
+            });
+
+            console.log('StarWave AI 高级版页面已加载');
+        });
+
+        // 鼠标悬停效果
+        document.querySelectorAll('.feature-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-8px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // 键盘导航支持
+        document.addEventListener('keydown', (e) => {
+            // 按 R 键刷新页面
+            if (e.key === 'r' || e.key === 'R') {
+                if (!e.ctrlKey && !e.metaKey) {
+                    e.preventDefault();
+                    location.reload();
+                }
+            }
+        });
+
+        // 错误处理
+        window.addEventListener('error', (e) => {
+            console.error('页面错误:', e.error);
+        });
+
+        // 性能监控
+        window.addEventListener('load', () => {
+            if ('performance' in window) {
+                const perfData = performance.getEntriesByType('navigation')[0];
+                console.log(`高级版页面加载时间: ${perfData.loadEventEnd - perfData.fetchStart}ms`);
+            }
+        });
+    </script>
+</body>
+</html>
