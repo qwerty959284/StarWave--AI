@@ -310,6 +310,32 @@
             margin-right: 0.75rem;
         }
 
+        /* 购买按钮 */
+        .buy-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1.2rem 3rem;
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: var(--border-radius-lg);
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all var(--transition-normal);
+            box-shadow: var(--shadow-glow);
+            margin-top: 1rem;
+            width: 100%;
+            justify-content: center;
+        }
+
+        .buy-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.5);
+            background: var(--primary-dark);
+        }
+
         /* 新功能卡片 */
         .feature-cards {
             display: grid;
@@ -596,10 +622,10 @@
                 <li><i class="fas fa-check"></i> 多账号授权</li>
                 <li><i class="fas fa-check"></i> 定制功能请求</li>
             </ul>
-            <div class="contact-link" style="justify-content: center; margin-top: 1.5rem;">
+            <a href="https://xx.youxi186.com/shop/ccnbSGZ" class="buy-button">
                 <i class="fas fa-shopping-cart"></i>
-                购买请联系客服
-            </div>
+                立即购买
+            </a>
         </div>
         
         <!-- 新功能卡片 -->
@@ -631,7 +657,7 @@
         <div class="contact-section" id="contact">
             <h3 class="contact-title">需要帮助？联系我们</h3>
             <div class="contact-links">
-                <a href="#" class="contact-link">
+                <a href="https://qm.qq.com/cgi-bin/qm/qr?k=5sQO8J7xHfJhL4w9zZ8n9q3Q4b7X9r2f&jump_from=webapi&authKey=9T9r9t9v9w9x9y9z0A0B0C0D0E0F0G0H0I0J0K0L0M0N0O0P0Q" class="contact-link">
                     <i class="fab fa-qq"></i>
                     QQ群: 192999459
                 </a>
